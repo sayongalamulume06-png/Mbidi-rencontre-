@@ -2,7 +2,6 @@
 <html>
 <head>
     <title>Mbidi Rencontre</title>
-    <!-- Chargement de la bibliothèque PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
@@ -11,18 +10,17 @@
     <video id="remoteVideo" autoplay playsinline style="width: 300px; border: 1px solid black;"></video>
 
     <script>
-        const peer = new Peer(); // Crée un identifiant unique pour vous
+        const peer = new Peer();
         
         peer.on('open', (id) => {
-            console.log('Mon ID est : ' + id);
-            alert('Donnez cet ID à votre ami pour qu\'il vous appelle : ' + id);
+            console.log('My ID is: ' + id);
+            alert('Your ID: ' + id);
         });
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then(stream => {
                 document.getElementById('localVideo').srcObject = stream;
                 
-                // Écouter les appels entrants
                 peer.on('call', (call) => {
                     call.answer(stream);
                     call.on('stream', (remoteStream) => {
