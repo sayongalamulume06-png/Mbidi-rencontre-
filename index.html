@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mbidi Rencontre</title>
+</head>
+<body>
+    <h1>Mbidi Rencontre</h1>
+    <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
+    <script>
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                document.getElementById('localVideo').srcObject = stream;
+            })
+            .catch(err => console.error("Erreur caméra :", err));
+    </script>
+</body>
+</html>
