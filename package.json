@@ -1,12 +1,13 @@
 {
   "name": "mbidi-rencontre",
   "version": "1.0.0",
-  "description": "Plateforme de rencontre Mbidi",
+  "description": "Plateforme de rencontre",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "peer": "^1.0.0"
   }
 }
