@@ -6,28 +6,42 @@
 </head>
 <body>
     <h1>Mbidi Rencontre</h1>
+    <div id="myId">Chargement de votre ID...</div>
     <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
     <video id="remoteVideo" autoplay playsinline style="width: 300px; border: 1px solid black;"></video>
+    
+    <br><br>
+    <input type="text" id="peerId" placeholder="Entrez l'ID de l'ami">
+    <button onclick="callFriend()">Appeler</button>
 
     <script>
         const peer = new Peer();
+        let myStream;
         
         peer.on('open', (id) => {
-            console.log('My ID is: ' + id);
-            alert('Your ID: ' + id);
+            document.getElementById('myId').innerText = 'Votre ID : ' + id;
         });
 
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then(stream => {
+                myStream = stream;
                 document.getElementById('localVideo').srcObject = stream;
-                
-                peer.on('call', (call) => {
-                    call.answer(stream);
-                    call.on('stream', (remoteStream) => {
-                        document.getElementById('remoteVideo').srcObject = remoteStream;
-                    });
-                });
             });
+
+        peer.on('call', (call) => {
+            call.answer(myStream);
+            call.on('stream', (remoteStream) => {
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            });
+        });
+
+        function callFriend() {
+            const id = document.getElementById('peerId').value;
+            const call = peer.call(id, myStream);
+            call.on('stream', (remoteStream) => {
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            });
+        }
     </script>
 </body>
 </html>
