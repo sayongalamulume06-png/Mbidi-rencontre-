@@ -17,19 +17,24 @@
     <div id="video-container">
         <h1>Bonjour <span id="displayName"></span></h1>
         <div id="myId">Chargement...</div>
-        <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
-        <!-- Ajout de 'controls' ici pour la gestion du son -->
-        <video id="remoteVideo" autoplay playsinline controls style="width: 300px; border: 1px solid black;"></video>
-        <br><br>
+        <video id="localVideo" autoplay muted playsinline style="width: 200px; border: 1px solid black;"></video>
+        <video id="remoteVideo" autoplay playsinline controls style="width: 200px; border: 1px solid black;"></video>
+        <br>
         <input type="text" id="peerId" placeholder="ID de l'ami">
         <button onclick="callFriend()">Appeler</button>
+        <hr>
+        <h3>Envoyer une photo</h3>
+        <input type="file" id="fileInput" accept="image/*">
+        <button onclick="sendPhoto()">Envoyer Photo</button>
+        <div id="messageArea"></div>
     </div>
 
     <script>
+        let peer, myStream, conn;
+
         function startApp() {
             const name = document.getElementById('username').value;
             if (name === "") return alert("Veuillez entrer un nom");
-            
             document.getElementById('displayName').innerText = name;
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('video-container').style.display = 'block';
@@ -37,12 +42,8 @@
         }
 
         function initPeer() {
-            const peer = new Peer();
-            let myStream;
-            
-            peer.on('open', (id) => {
-                document.getElementById('myId').innerText = 'Votre ID : ' + id;
-            });
+            peer = new Peer();
+            peer.on('open', (id) => { document.getElementById('myId').innerText = 'Votre ID : ' + id; });
 
             navigator.mediaDevices.getUserMedia({ video: true, audio: true })
                 .then(stream => {
@@ -52,18 +53,36 @@
 
             peer.on('call', (call) => {
                 call.answer(myStream);
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('remoteVideo').srcObject = remoteStream;
-                });
+                call.on('stream', (remoteStream) => { document.getElementById('remoteVideo').srcObject = remoteStream; });
             });
 
-            window.callFriend = function() {
-                const id = document.getElementById('peerId').value;
-                const call = peer.call(id, myStream);
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('remoteVideo').srcObject = remoteStream;
-                });
-            }
+            peer.on('connection', (c) => { 
+                conn = c; 
+                setupConnection(); 
+            });
+        }
+
+        function callFriend() {
+            const id = document.getElementById('peerId').value;
+            peer.call(id, myStream).on('stream', (remoteStream) => { document.getElementById('remoteVideo').srcObject = remoteStream; });
+            conn = peer.connect(id);
+            setupConnection();
+        }
+
+        function setupConnection() {
+            conn.on('data', (data) => {
+                const img = document.createElement('img');
+                img.src = data;
+                img.style.width = '200px';
+                document.getElementById('messageArea').prepend(img);
+            });
+        }
+
+        function sendPhoto() {
+            const file = document.getElementById('fileInput').files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => { conn.send(e.target.result); };
+            reader.readAsDataURL(file);
         }
     </script>
 </body>
