@@ -1,127 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mbidi Rencontre</title>
     <link rel="manifest" href="manifest.json">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
-        #video-container { display: none; }
+        body { font-family: sans-serif; background-color: #f8f9fa; margin: 0; padding-bottom: 70px; }
+        .header { padding: 20px; font-weight: bold; font-size: 24px; background: white; }
+        .card { 
+            background: white; border-radius: 20px; padding: 15px; 
+            margin: 10px; display: flex; align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .avatar { width: 60px; height: 60px; border-radius: 50%; background: #ccc; margin-right: 15px; }
+        .info { flex-grow: 1; }
+        .hi-btn { 
+            background: #ffe0f0; color: #ff66b2; border: none; 
+            padding: 8px 20px; border-radius: 20px; font-weight: bold; 
+        }
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; display: flex; justify-content: space-around;
+            padding: 15px 0; border-top: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
-    <div id="login-screen">
-        <h1>Bienvenue sur Mbidi Rencontre</h1>
-        <p>Profitez de 10 messages gratuits !</p>
-        <input type="text" id="username" placeholder="Entrez votre nom">
-        <button onclick="startApp()">Entrer</button>
+    <div class="header">Recommander</div>
+
+    <!-- Carte Profil 1 -->
+    <div class="card">
+        <div class="avatar"></div>
+        <div class="info">
+            <strong>Rose Mella</strong><br>
+            <small>Célibataire ❤️</small>
+        </div>
+        <button class="hi-btn">Hi</button>
     </div>
 
-    <div id="video-container">
-        <h1>Bonjour <span id="displayName"></span></h1>
-        <div id="myId">Chargement...</div>
-        <p>Messages restants : <span id="creditDisplay">10</span></p>
-        <video id="localVideo" autoplay muted playsinline style="width: 200px; border: 1px solid black;"></video>
-        <video id="remoteVideo" autoplay playsinline controls style="width: 200px; border: 1px solid black;"></video>
-        
-        <hr>
-        <h3>Envoi de fichiers / Voice</h3>
-        <input type="file" id="fileInput" accept="image/*">
-        <button onclick="sendPhoto()">Envoyer Photo</button>
-        <br><br>
-        <button id="recordBtn" onclick="startRecording()">Enregistrer Voix</button>
-        <button id="stopBtn" onclick="stopRecording()" disabled>Arrêter et Envoyer</button>
-        
-        <div id="messageArea"></div>
+    <!-- Carte Profil 2 -->
+    <div class="card">
+        <div class="avatar"></div>
+        <div class="info">
+            <strong>Jennie 💋</strong><br>
+            <small>En ligne</small>
+        </div>
+        <button class="hi-btn">Hi</button>
     </div>
 
-    <script>
-        let peer, myStream, conn, mediaRecorder, audioChunks = [];
-        let messageCredits = 10; 
-
-        function checkCredits() {
-            if (messageCredits > 0) {
-                messageCredits--;
-                document.getElementById('creditDisplay').innerText = messageCredits;
-                return true;
-            } else {
-                alert("Vos 10 messages gratuits sont épuisés !");
-                return false;
-            }
-        }
-
-        function startApp() {
-            const name = document.getElementById('username').value;
-            if (name === "") return alert("Veuillez entrer un nom");
-            document.getElementById('displayName').innerText = name;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('video-container').style.display = 'block';
-            initPeer();
-        }
-
-        function initPeer() {
-            peer = new Peer();
-            peer.on('open', (id) => { document.getElementById('myId').innerText = 'Votre ID : ' + id; });
-
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then(stream => {
-                    myStream = stream;
-                    document.getElementById('localVideo').srcObject = stream;
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.ondataavailable = (event) => { audioChunks.push(event.data); };
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const reader = new FileReader();
-                        reader.onload = (e) => { conn.send(e.target.result); };
-                        reader.readAsDataURL(audioBlob);
-                        audioChunks = [];
-                    };
-                });
-
-            peer.on('call', (call) => {
-                call.answer(myStream);
-                call.on('stream', (remoteStream) => { document.getElementById('remoteVideo').srcObject = remoteStream; });
-            });
-
-            peer.on('connection', (c) => { conn = c; setupConnection(); });
-        }
-
-        function setupConnection() {
-            conn.on('data', (data) => {
-                if (data.startsWith('data:image')) {
-                    const img = document.createElement('img');
-                    img.src = data;
-                    img.style.width = '200px';
-                    document.getElementById('messageArea').prepend(img);
-                } else if (data.startsWith('data:audio')) {
-                    const audio = document.createElement('audio');
-                    audio.src = data;
-                    audio.controls = true;
-                    document.getElementById('messageArea').prepend(audio);
-                }
-            });
-        }
-
-        function startRecording() {
-            audioChunks = [];
-            mediaRecorder.start();
-            document.getElementById('recordBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = false;
-        }
-
-        function stopRecording() {
-            if (!checkCredits()) return;
-            mediaRecorder.stop();
-            document.getElementById('recordBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-        }
-
-        function sendPhoto() {
-            if (!checkCredits()) return;
-            const file = document.getElementById('fileInput').files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => { conn.send(e.target.result); };
-            reader.readAsDataURL(file);
-        }
-    </script>
+    <div class="nav-bar">
+        <div>Accueil</div>
+        <div>Chat</div>
+        <div>Moi</div>
+    </div>
 </body>
 </html>
