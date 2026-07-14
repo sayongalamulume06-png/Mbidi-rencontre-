@@ -10,6 +10,7 @@
 <body>
     <div id="login-screen">
         <h1>Bienvenue sur Mbidi Rencontre</h1>
+        <p>Profitez de 10 messages gratuits !</p>
         <input type="text" id="username" placeholder="Entrez votre nom">
         <button onclick="startApp()">Entrer</button>
     </div>
@@ -17,16 +18,15 @@
     <div id="video-container">
         <h1>Bonjour <span id="displayName"></span></h1>
         <div id="myId">Chargement...</div>
+        <p>Messages restants : <span id="creditDisplay">10</span></p>
         <video id="localVideo" autoplay muted playsinline style="width: 200px; border: 1px solid black;"></video>
         <video id="remoteVideo" autoplay playsinline controls style="width: 200px; border: 1px solid black;"></video>
         
         <hr>
         <h3>Envoi de fichiers / Voice</h3>
-        <!-- Section Fichier -->
         <input type="file" id="fileInput" accept="image/*">
         <button onclick="sendPhoto()">Envoyer Photo</button>
         <br><br>
-        <!-- Section Voix -->
         <button id="recordBtn" onclick="startRecording()">Enregistrer Voix</button>
         <button id="stopBtn" onclick="stopRecording()" disabled>Arrêter et Envoyer</button>
         
@@ -35,6 +35,18 @@
 
     <script>
         let peer, myStream, conn, mediaRecorder, audioChunks = [];
+        let messageCredits = 10; 
+
+        function checkCredits() {
+            if (messageCredits > 0) {
+                messageCredits--;
+                document.getElementById('creditDisplay').innerText = messageCredits;
+                return true;
+            } else {
+                alert("Vos 10 messages gratuits sont épuisés !");
+                return false;
+            }
+        }
 
         function startApp() {
             const name = document.getElementById('username').value;
@@ -53,8 +65,6 @@
                 .then(stream => {
                     myStream = stream;
                     document.getElementById('localVideo').srcObject = stream;
-                    
-                    // Préparation de l'enregistrement audio
                     mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.ondataavailable = (event) => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
@@ -71,10 +81,7 @@
                 call.on('stream', (remoteStream) => { document.getElementById('remoteVideo').srcObject = remoteStream; });
             });
 
-            peer.on('connection', (c) => { 
-                conn = c; 
-                setupConnection(); 
-            });
+            peer.on('connection', (c) => { conn = c; setupConnection(); });
         }
 
         function callFriend() {
@@ -108,12 +115,14 @@
         }
 
         function stopRecording() {
+            if (!checkCredits()) return;
             mediaRecorder.stop();
             document.getElementById('recordBtn').disabled = false;
             document.getElementById('stopBtn').disabled = true;
         }
 
         function sendPhoto() {
+            if (!checkCredits()) return;
             const file = document.getElementById('fileInput').files[0];
             const reader = new FileReader();
             reader.onload = (e) => { conn.send(e.target.result); };
