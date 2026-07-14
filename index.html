@@ -1,39 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mbidi Rencontre</title>
     <style>
-        /* Styles existants */
-        body { font-family: sans-serif; background-color: #f8f9fa; margin: 0; padding-bottom: 70px; }
+        body { font-family: sans-serif; margin: 0; padding-bottom: 70px; background: #f0f2f5; }
         .page { display: none; }
         .page.active { display: block; }
-        .header { padding: 20px; font-weight: bold; font-size: 24px; background: white; }
+        .header { padding: 15px; background: white; font-weight: bold; font-size: 20px; border-bottom: 1px solid #ddd; }
         
-        /* AJOUTEZ CES LIGNES ICI POUR LE STYLE CHAT */
-        .chat-container { display: flex; flex-direction: column; padding: 15px; }
-        .bubble { max-width: 75%; padding: 10px 15px; margin: 5px; border-radius: 15px; font-size: 14px; }
-        .bubble.received { background: #e4e6eb; align-self: flex-start; }
-        .bubble.sent { background: #0084ff; color: white; align-self: flex-end; }
+        /* Style des bulles chat */
+        .chat-container { display: flex; flex-direction: column; padding: 10px; }
+        .bubble { max-width: 80%; padding: 10px; margin: 5px; border-radius: 15px; font-size: 14px; }
+        .received { background: white; align-self: flex-start; border: 1px solid #ddd; }
+        .sent { background: #0084ff; color: white; align-self: flex-end; }
         
-        /* Styles navigation */
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
-        .nav-item { cursor: pointer; font-weight: bold; }
+        /* Navigation */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
+        .nav-item { font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- PAGE CHAT -->
+    <div id="accueil" class="page active">
+        <div class="header">Recommander</div>
+        <div style="padding: 20px; text-align: center;">Bienvenue sur Mbidi Rencontre</div>
+    </div>
+
     <div id="chat" class="page">
         <div class="header">Discussion</div>
         <div class="chat-container">
-            <div class="bubble received">Salut ! Comment ça va ?</div>
-            <div class="bubble sent">Ça va très bien et toi ?</div>
-            <div class="bubble received">Super ! Tu fais quoi ?</div>
+            <div class="bubble received">Salut, ça va ?</div>
+            <div class="bubble sent">Oui et toi ?</div>
         </div>
     </div>
 
-    <!-- ... le reste de votre code (Accueil, Navigation, Script) ... -->
+    <div class="nav-bar">
+        <div class="nav-item" onclick="show('accueil')">Accueil</div>
+        <div class="nav-item" onclick="show('chat')">Chat</div>
+        <div class="nav-item">Moi</div>
+    </div>
 
+    <script>
+        function show(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
 </body>
 </html>
