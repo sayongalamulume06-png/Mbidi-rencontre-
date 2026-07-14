@@ -19,18 +19,22 @@
         <div id="myId">Chargement...</div>
         <video id="localVideo" autoplay muted playsinline style="width: 200px; border: 1px solid black;"></video>
         <video id="remoteVideo" autoplay playsinline controls style="width: 200px; border: 1px solid black;"></video>
-        <br>
-        <input type="text" id="peerId" placeholder="ID de l'ami">
-        <button onclick="callFriend()">Appeler</button>
+        
         <hr>
-        <h3>Envoyer une photo</h3>
+        <h3>Envoi de fichiers / Voice</h3>
+        <!-- Section Fichier -->
         <input type="file" id="fileInput" accept="image/*">
         <button onclick="sendPhoto()">Envoyer Photo</button>
+        <br><br>
+        <!-- Section Voix -->
+        <button id="recordBtn" onclick="startRecording()">Enregistrer Voix</button>
+        <button id="stopBtn" onclick="stopRecording()" disabled>Arrêter et Envoyer</button>
+        
         <div id="messageArea"></div>
     </div>
 
     <script>
-        let peer, myStream, conn;
+        let peer, myStream, conn, mediaRecorder, audioChunks = [];
 
         function startApp() {
             const name = document.getElementById('username').value;
@@ -49,6 +53,17 @@
                 .then(stream => {
                     myStream = stream;
                     document.getElementById('localVideo').srcObject = stream;
+                    
+                    // Préparation de l'enregistrement audio
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (event) => { audioChunks.push(event.data); };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const reader = new FileReader();
+                        reader.onload = (e) => { conn.send(e.target.result); };
+                        reader.readAsDataURL(audioBlob);
+                        audioChunks = [];
+                    };
                 });
 
             peer.on('call', (call) => {
@@ -71,11 +86,31 @@
 
         function setupConnection() {
             conn.on('data', (data) => {
-                const img = document.createElement('img');
-                img.src = data;
-                img.style.width = '200px';
-                document.getElementById('messageArea').prepend(img);
+                if (data.startsWith('data:image')) {
+                    const img = document.createElement('img');
+                    img.src = data;
+                    img.style.width = '200px';
+                    document.getElementById('messageArea').prepend(img);
+                } else if (data.startsWith('data:audio')) {
+                    const audio = document.createElement('audio');
+                    audio.src = data;
+                    audio.controls = true;
+                    document.getElementById('messageArea').prepend(audio);
+                }
             });
+        }
+
+        function startRecording() {
+            audioChunks = [];
+            mediaRecorder.start();
+            document.getElementById('recordBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            document.getElementById('recordBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
         }
 
         function sendPhoto() {
