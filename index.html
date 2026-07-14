@@ -18,7 +18,8 @@
         <h1>Bonjour <span id="displayName"></span></h1>
         <div id="myId">Chargement...</div>
         <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
-        <video id="remoteVideo" autoplay playsinline style="width: 300px; border: 1px solid black;"></video>
+        <!-- Ajout de 'controls' ici pour la gestion du son -->
+        <video id="remoteVideo" autoplay playsinline controls style="width: 300px; border: 1px solid black;"></video>
         <br><br>
         <input type="text" id="peerId" placeholder="ID de l'ami">
         <button onclick="callFriend()">Appeler</button>
