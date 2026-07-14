@@ -4,54 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mbidi Rencontre</title>
-    <link rel="manifest" href="manifest.json">
     <style>
         body { font-family: sans-serif; background-color: #f8f9fa; margin: 0; padding-bottom: 70px; }
+        .page { display: none; }
+        .page.active { display: block; }
         .header { padding: 20px; font-weight: bold; font-size: 24px; background: white; }
-        .card { 
-            background: white; border-radius: 20px; padding: 15px; 
-            margin: 10px; display: flex; align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; background: #ccc; margin-right: 15px; }
-        .info { flex-grow: 1; }
-        .hi-btn { 
-            background: #ffe0f0; color: #ff66b2; border: none; 
-            padding: 8px 20px; border-radius: 20px; font-weight: bold; 
-        }
-        .nav-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: white; display: flex; justify-content: space-around;
-            padding: 15px 0; border-top: 1px solid #ddd;
-        }
+        .card { background: white; border-radius: 20px; padding: 15px; margin: 10px; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #ccc; margin-right: 15px; }
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #ddd; }
+        .nav-item { cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">Recommander</div>
 
-    <!-- Carte Profil 1 -->
-    <div class="card">
-        <div class="avatar"></div>
-        <div class="info">
-            <strong>Rose Mella</strong><br>
-            <small>Célibataire ❤️</small>
-        </div>
-        <button class="hi-btn">Hi</button>
+    <!-- PAGE ACCUEIL -->
+    <div id="home" class="page active">
+        <div class="header">Recommander</div>
+        <div class="card"><div class="avatar"></div><strong>Rose Mella</strong></div>
+        <div class="card"><div class="avatar"></div><strong>Jennie</strong></div>
     </div>
 
-    <!-- Carte Profil 2 -->
-    <div class="card">
-        <div class="avatar"></div>
-        <div class="info">
-            <strong>Jennie 💋</strong><br>
-            <small>En ligne</small>
-        </div>
-        <button class="hi-btn">Hi</button>
+    <!-- PAGE CHAT -->
+    <div id="chat" class="page">
+        <div class="header">Messages</div>
+        <div class="card"><div class="avatar"></div><strong>Theodora</strong><br>Oui</div>
+        <div class="card"><div class="avatar"></div><strong>Brigitte</strong><br>cc</div>
     </div>
-<div class="nav-bar">
-    <a href="index.html" style="text-decoration:none; color:black; font-weight:bold;">Accueil</a>
-    <a href="messages.html" style="text-decoration:none; color:black;">Chat</a>
-    <a href="#" style="text-decoration:none; color:black;">Moi</a>
-</div>
+
+    <!-- BARRE DE NAVIGATION -->
+    <div class="nav-bar">
+        <div class="nav-item" onclick="showPage('home')">Accueil</div>
+        <div class="nav-item" onclick="showPage('chat')">Chat</div>
+        <div class="nav-item">Moi</div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+    </script>
 </body>
 </html>
