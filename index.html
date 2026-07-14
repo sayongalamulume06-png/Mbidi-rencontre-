@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Mbidi Rencontre</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         #video-container { display: none; }
@@ -82,13 +83,6 @@
             });
 
             peer.on('connection', (c) => { conn = c; setupConnection(); });
-        }
-
-        function callFriend() {
-            const id = document.getElementById('peerId').value;
-            peer.call(id, myStream).on('stream', (remoteStream) => { document.getElementById('remoteVideo').srcObject = remoteStream; });
-            conn = peer.connect(id);
-            setupConnection();
         }
 
         function setupConnection() {
