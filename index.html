@@ -3,44 +3,66 @@
 <head>
     <title>Mbidi Rencontre</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        #video-container { display: none; }
+    </style>
 </head>
 <body>
-    <h1>Mbidi Rencontre</h1>
-    <div id="myId">Chargement de votre ID...</div>
-    <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
-    <video id="remoteVideo" autoplay playsinline style="width: 300px; border: 1px solid black;"></video>
-    
-    <br><br>
-    <input type="text" id="peerId" placeholder="Entrez l'ID de l'ami">
-    <button onclick="callFriend()">Appeler</button>
+    <div id="login-screen">
+        <h1>Bienvenue sur Mbidi Rencontre</h1>
+        <input type="text" id="username" placeholder="Entrez votre nom">
+        <button onclick="startApp()">Entrer</button>
+    </div>
+
+    <div id="video-container">
+        <h1>Bonjour <span id="displayName"></span></h1>
+        <div id="myId">Chargement...</div>
+        <video id="localVideo" autoplay muted playsinline style="width: 300px; border: 1px solid black;"></video>
+        <video id="remoteVideo" autoplay playsinline style="width: 300px; border: 1px solid black;"></video>
+        <br><br>
+        <input type="text" id="peerId" placeholder="ID de l'ami">
+        <button onclick="callFriend()">Appeler</button>
+    </div>
 
     <script>
-        const peer = new Peer();
-        let myStream;
-        
-        peer.on('open', (id) => {
-            document.getElementById('myId').innerText = 'Votre ID : ' + id;
-        });
+        function startApp() {
+            const name = document.getElementById('username').value;
+            if (name === "") return alert("Veuillez entrer un nom");
+            
+            document.getElementById('displayName').innerText = name;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('video-container').style.display = 'block';
+            initPeer();
+        }
 
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-            .then(stream => {
-                myStream = stream;
-                document.getElementById('localVideo').srcObject = stream;
+        function initPeer() {
+            const peer = new Peer();
+            let myStream;
+            
+            peer.on('open', (id) => {
+                document.getElementById('myId').innerText = 'Votre ID : ' + id;
             });
 
-        peer.on('call', (call) => {
-            call.answer(myStream);
-            call.on('stream', (remoteStream) => {
-                document.getElementById('remoteVideo').srcObject = remoteStream;
-            });
-        });
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    myStream = stream;
+                    document.getElementById('localVideo').srcObject = stream;
+                });
 
-        function callFriend() {
-            const id = document.getElementById('peerId').value;
-            const call = peer.call(id, myStream);
-            call.on('stream', (remoteStream) => {
-                document.getElementById('remoteVideo').srcObject = remoteStream;
+            peer.on('call', (call) => {
+                call.answer(myStream);
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                });
             });
+
+            window.callFriend = function() {
+                const id = document.getElementById('peerId').value;
+                const call = peer.call(id, myStream);
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                });
+            }
         }
     </script>
 </body>
